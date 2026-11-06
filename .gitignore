@@ -1,0 +1,35 @@
+# .NET build output
+**/bin/
+**/obj/
+**/publish/
+*.user
+*.suo
+.vs/
+
+# IDE and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+**/appsettings.Development.json
+**/appsettings.Production.json
+secrets.json
+
+# Logs and temporary files
+*.log
+logs/
+*.tmp
+
+# Database exports / backups
+*.bak
+*.bacpac
+*.mdf
+*.ldf
+*.sql
+*.sqlite
+*.db
