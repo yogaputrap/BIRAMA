@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0369a1">
+  <link rel="icon" type="image/png" href="src/assets/favicon.png">
+  <link rel="apple-touch-icon" href="src/assets/favicon.png">
+  <title>BIRAMA - Dashboard Booking & Monitoring Kelas</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Standalone Modular CSS -->
+  <link rel="stylesheet" href="src/styles/main.css">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#f0f7ff',
+              100: '#e0effe',
+              500: '#0284c7',
+              600: '#0369a1',
+              700: '#075985',
+              900: '#0c4a6e',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen">
+
+  <!-- =====================================================================
+       SHELL 1: SITUS PUBLIK (katalog, matriks waktu, riwayat saya)
+       ===================================================================== -->
+  <div id="shell-public" class="hidden">
+   <div class="min-h-screen flex flex-col">
+    <header class="bg-white sticky top-0 z-40 shadow-sm">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16 gap-3">
+          <div class="flex items-center gap-4 lg:gap-6 min-w-0">
+            <a href="#/" class="shrink-0" aria-label="BIRAMA - Beranda">
+              <img src="src/assets/logo-bi-institute.png" alt="BI Institute" class="h-8 sm:h-10 w-auto object-contain" width="803" height="192">
+            </a>
+            <!-- Navigasi desktop -->
+            <nav class="hidden md:flex space-x-6 ms-2" aria-label="Navigasi utama">
+              <a href="#/" data-nav="/" class="nav-link"><i class="fa-solid fa-border-all"></i><span data-i18n="navRoomCatalog">Katalog Ruangan</span></a>
+              <a href="#/jadwal" data-nav="/jadwal" class="nav-link"><i class="fa-solid fa-calendar-days"></i><span data-i18n="navTimeGrid">Matriks Waktu</span></a>
+              <a href="#/riwayat" data-nav="/riwayat" class="nav-link"><i class="fa-solid fa-clock-rotate-left"></i><span data-i18n="navMyBookings">Riwayat Saya</span></a>
+            </nav>
+          </div>
+
+          <div class="flex items-center gap-1.5 sm:gap-3">
+            <div class="flex items-center gap-1 text-slate-500">
+              <i class="fa-solid fa-language text-base ms-1"></i>
+              <select onchange="changeLanguage(this.value)" class="lang-select h-8 px-1 text-slate-700 text-xs font-semibold rounded-lg bg-transparent border-0 outline-none cursor-pointer" aria-label="Bahasa / Language">
+                <option value="id">ID</option>
+                <option value="en">EN</option>
+              </select>
+            </div>
+            <div id="auth-area-public"></div>
+            <button id="btn-mobile-menu" type="button" onclick="toggleMobileMenu()" class="md:hidden w-10 h-10 rounded-lg text-slate-600 hover:bg-slate-100 flex items-center justify-center" aria-label="Menu" aria-expanded="false">
+              <i class="fa-solid fa-bars"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      <!-- Menu mobile -->
+      <div id="mobile-menu" class="hidden md:hidden border-t border-slate-200 bg-white">
+        <div class="px-4 py-3 space-y-1">
+          <a href="#/" data-nav="/" class="mobile-link"><i class="fa-solid fa-border-all"></i><span data-i18n="navRoomCatalog">Katalog Ruangan</span></a>
+          <a href="#/jadwal" data-nav="/jadwal" class="mobile-link"><i class="fa-solid fa-calendar-days"></i><span data-i18n="navTimeGrid">Matriks Waktu</span></a>
+          <a href="#/riwayat" data-nav="/riwayat" class="mobile-link"><i class="fa-solid fa-clock-rotate-left"></i><span data-i18n="navMyBookings">Riwayat Saya</span></a>
+          <div id="mobile-auth-area" class="pt-2 mt-2 border-t border-slate-100"></div>
+        </div>
+      </div>
+    </header>
+
+    <main id="public-content" class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+
+          <!-- INTERFACE 1: KATALOG & RESERVASI -->
+    <section id="interface1" class="route-page space-y-6">
+      
+      <!-- Filter Tanggal & Jam Universal -->
+      <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-4">
+        <div class="flex flex-wrap items-end gap-3 sm:gap-4 w-full md:w-auto">
+          <div class="w-full sm:w-auto">
+            <label class="block text-xs font-semibold text-slate-500 mb-1" data-i18n="dateFilterLabel">Tanggal Cek Ketersediaan</label>
+            <input type="date" id="filter-i1-date" class="w-full sm:w-auto h-[38px] px-3 py-1.5 border border-slate-300 rounded-lg text-sm font-medium focus:ring-2 focus:ring-brand-500 outline-none">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1" data-i18n="timeLabel">Jam</label>
+            <div class="flex items-center gap-1.5 h-[38px]">
+              <select id="filter-i1-start-hour" class="h-full px-2.5 border border-slate-300 rounded-lg text-sm font-semibold text-slate-700 outline-none focus:ring-2 focus:ring-brand-500 bg-white">
+              </select>
+              <span class="text-sm font-bold text-slate-500">:</span>
+              <select id="filter-i1-start-min" class="h-full px-2.5 border border-slate-300 rounded-lg text-sm font-semibold text-slate-700 outline-none focus:ring-2 focus:ring-brand-500 bg-white">
+                <option value="00">00</option>
+                <option value="15">15</option>
+                <option value="30">30</option>
+                <option value="45">45</option>
+              </select>
+              <span class="text-xs text-slate-500 font-semibold ms-1">WIB</span>
+            </div>
+          </div>
+
+          <div>
+            <button onclick="applyCatalogFilter()" class="h-[38px] px-4 bg-brand-600 hover:bg-brand-700 text-white font-medium text-sm rounded-lg shadow-sm transition flex items-center gap-1.5">
+              <i class="fa-solid fa-filter text-xs"></i> <span data-i18n="applyFilter">Terapkan Filter</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="text-xs text-slate-500 flex flex-wrap items-center gap-x-3 gap-y-1">
+          <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-emerald-500"></span> <span data-i18n="statusAvailable">Tersedia</span></span>
+          <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-amber-500"></span> <span data-i18n="statusPendingSlot">Slot Menunggu</span></span>
+          <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-blue-600"></span> <span data-i18n="statusOccupied">Terpakai</span></span>
+        </div>
+      </div>
+
+      <!-- Section Title -->
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-xl font-bold text-slate-800" data-i18n="roomCatalogTitle">Katalog Ruang Kelas</h2>
+        </div>
+      </div>
+
+      <!-- Room Cards Grid -->
+      <div id="rooms-grid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+      </div>
+    </section>
+
+          <!-- INTERFACE 2: JADWAL TABEL & MATRIX GRID -->
+    <section id="interface2" class="route-page hidden space-y-4">
+      
+      <!-- Top Bar Controls -->
+      <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <!-- Date Navigation Bar -->
+          <div class="flex flex-wrap items-center gap-2">
+            <button onclick="resetI2DateToday()" class="h-[38px] px-3.5 text-xs font-semibold bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 border border-slate-300 flex items-center justify-center" data-i18n="btnToday">Hari Ini</button>
+            <button onclick="adjustI2Date(-1)" class="h-[38px] px-2.5 rounded-lg text-slate-600 hover:bg-slate-100 flex items-center justify-center"><i class="fa-solid fa-chevron-left text-xs"></i></button>
+            <button onclick="adjustI2Date(1)" class="h-[38px] px-2.5 rounded-lg text-slate-600 hover:bg-slate-100 flex items-center justify-center"><i class="fa-solid fa-chevron-right text-xs"></i></button>
+            <input type="date" id="i2-date-picker" onchange="handleI2DateChange()" class="h-[38px] px-3 border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 outline-none flex-1 min-w-[140px]">
+          </div>
+
+          <!-- View Switcher Toggle -->
+          <div class="flex items-center gap-3">
+            <div class="flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200">
+              <button id="btn-view-grid" onclick="setI2View('grid')" class="px-3 py-1.5 rounded-md text-xs font-semibold bg-white text-slate-800 shadow-sm flex items-center gap-1">
+                <i class="fa-solid fa-door-open"></i> <span data-i18n="viewRooms">Ruangan</span>
+              </button>
+              <button id="btn-view-list" onclick="setI2View('list')" class="px-3 py-1.5 rounded-md text-xs font-semibold text-slate-600 hover:text-slate-900 flex items-center gap-1">
+                <i class="fa-solid fa-calendar-days"></i> <span data-i18n="viewCalendar">Kalender</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filters Row dengan Tombol Booking Kelas -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 pt-2 border-t border-slate-100 items-end">
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-500 mb-0.5" data-i18n="filterRoom">Filter Kelas</label>
+            <select id="i2-filter-room" onchange="renderInterface2()" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs outline-none bg-white h-[38px]">
+              <option value="ALL" data-i18n="allRooms">Semua Ruang Kelas</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-500 mb-0.5" data-i18n="filterStatus">Filter Status</label>
+            <select id="i2-filter-status" onchange="renderInterface2()" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs outline-none bg-white h-[38px]">
+              <option value="ALL" data-i18n="allStatus">Semua Status (Aktif)</option>
+              <option value="Approved" data-i18n="statusOccupied">Terpakai</option>
+              <option value="Pending" data-i18n="statusPendingSlot">Slot Menunggu</option>
+            </select>
+          </div>
+          <div id="i2-admin-filter-container" class="hidden">
+            <label class="block text-[11px] font-semibold text-slate-500 mb-0.5" data-i18n="searchPic">Cari Peminjam / Satker</label>
+            <input type="text" id="i2-filter-search" oninput="renderInterface2()" placeholder="Satker / PIC..." data-i18n-ph="searchPicPlaceholder" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs outline-none h-[38px]">
+          </div>
+          <div class="sm:col-span-2 md:col-span-1 md:col-start-4 flex justify-end">
+            <button onclick="openDirectBookingPopup()" class="w-full sm:w-auto h-[38px] px-6 py-2 rounded-lg text-xs font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-sm flex items-center justify-center gap-2 transition">
+              <i class="fa-solid fa-plus text-sm"></i> <span data-i18n="btnBookRoom">Pesan Ruangan</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 1: MATRIX GRID (24 HORAS) -->
+      <div id="i2-grid-view-container" class="bg-white rounded-xl shadow-sm border border-slate-300 overflow-hidden relative">
+        <div class="p-3 bg-slate-100 border-b border-slate-300 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-slate-500">
+          <span><i class="fa-solid fa-circle-info me-1"></i> <span id="grid-info-text">Geser horizontal untuk melihat jadwal 24 jam. Klik slot kosong untuk memesan.</span></span>
+          <div class="flex gap-3 shrink-0">
+            <span class="flex items-center gap-1"><span class="w-3 h-3 bg-amber-400 rounded"></span> <span data-i18n="statusPendingSlot">Slot Menunggu</span></span>
+            <span class="flex items-center gap-1"><span class="w-3 h-3 bg-blue-600 rounded"></span> <span data-i18n="statusOccupied">Terpakai</span></span>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto overflow-y-hidden relative" id="i2-matrix-scroll-wrapper">
+          <table class="border-collapse table-fixed relative matrix-table" style="width:1448px">
+            <thead>
+              <tr id="i2-grid-header" class="bg-slate-100 font-semibold text-[11px] text-slate-600 border-b border-slate-300">
+                <th class="matrix-label-col px-3 py-2.5 font-bold text-slate-700 sticky-frozen-header text-left" data-i18n="roomTableHeader">Ruang Kelas</th>
+              </tr>
+            </thead>
+            <tbody id="i2-grid-rows" class="bg-white divide-y divide-slate-300">
+            </tbody>
+          </table>
+          <div id="current-time-indicator" class="absolute top-[41px] bottom-0 z-20 pointer-events-none hidden">
+            <div class="absolute -top-1.5 -translate-x-1/2 w-3 h-3 bg-red-600 rounded-full shadow-sm border-2 border-white"></div>
+            <div class="w-[2px] bg-red-600 h-full mx-auto shadow-sm"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 2: CALENDAR VIEW -->
+      <div id="i2-list-view-container" class="hidden bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden p-3 sm:p-6 space-y-4">
+        <div class="flex items-center justify-between pb-4 border-b border-slate-200">
+          <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+            <i class="fa-solid fa-calendar-days text-brand-600"></i> <span data-i18n="calendarTitle">Kalender Bulanan Ruang Kelas</span>
+          </h3>
+          <span class="text-xs text-slate-500 font-medium" id="calendar-month-title">Oktober 2026</span>
+        </div>
+        <div class="grid grid-cols-7 gap-1 sm:gap-2 text-center text-[10px] sm:text-xs font-bold text-slate-500 pb-2 border-b border-slate-100">
+          <div data-i18n="dayMon">Sen</div>
+          <div data-i18n="dayTue">Sel</div>
+          <div data-i18n="dayWed">Rab</div>
+          <div data-i18n="dayThu">Kam</div>
+          <div data-i18n="dayFri">Jum</div>
+          <div data-i18n="daySat">Sab</div>
+          <div data-i18n="daySun">Min</div>
+        </div>
+        <div id="calendar-grid-days" class="grid grid-cols-7 gap-2">
+        </div>
+      </div>
+    </section>
+
+      <!-- RIWAYAT SAYA: riwayat, pelacakan, pembatalan -->
+      <section id="page-history" class="route-page hidden space-y-5">
+        <div class="bg-white p-3 sm:p-4 rounded-xl border border-slate-200 shadow-xs space-y-3">
+          <div class="relative">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+            <input type="search" id="history-search" oninput="renderHistory()" placeholder="Cari ID, kegiatan, ruangan…" data-i18n-ph="histSearchPh" class="field !ps-9">
+          </div>
+          <div id="history-tabs" class="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1"></div>
+        </div>
+
+        <div id="history-list" class="space-y-3"></div>
+      </section>
+
+      <!-- AKSES DITOLAK (login sebagai non-admin membuka situs admin) -->
+      <section id="page-forbidden" class="route-page hidden">
+        <div class="max-w-md mx-auto bg-white border border-slate-200 rounded-2xl shadow-sm p-8 text-center mt-8">
+          <div class="w-16 h-16 mx-auto rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-3xl mb-4"><i class="fa-solid fa-lock"></i></div>
+          <h2 class="text-xl font-bold text-slate-800" data-i18n="forbiddenTitle">Akses Ditolak</h2>
+          <p class="text-sm text-slate-500 mt-2" data-i18n="forbiddenDesc">Akun Anda tidak memiliki izin untuk membuka Situs Admin.</p>
+          <a href="#/" class="mt-6 inline-flex h-10 px-5 items-center bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold rounded-lg" data-i18n="forbiddenBack">Kembali ke Beranda</a>
+        </div>
+      </section>
+    </main>
+
+   </div>
+  </div>
+
+  <!-- =====================================================================
+       SHELL 3: SITUS ADMIN (sidebar & header tersendiri)
+       ===================================================================== -->
+  <div id="shell-admin" class="hidden">
+   <div class="min-h-screen lg:flex">
+    <div id="admin-sidebar-overlay" class="hidden fixed inset-0 z-40 bg-slate-900/50 lg:hidden" onclick="setAdminSidebar(false)"></div>
+    <aside id="admin-sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-white text-slate-600 border-r border-slate-200 flex flex-col -translate-x-full lg:translate-x-0 lg:sticky lg:top-0 lg:h-screen lg:shrink-0 transition-transform duration-200">
+      <div class="relative px-4 pt-5 pb-3 border-b border-slate-200 shrink-0 flex items-center justify-center">
+        <a href="#/admin" class="block" aria-label="BIRAMA"><img src="src/assets/logo-birama.png" alt="BIRAMA" class="h-20 w-auto mx-auto" width="2185" height="720"></a>
+        <button type="button" onclick="setAdminSidebar(false)" class="lg:hidden absolute top-2 right-2 w-9 h-9 rounded-lg text-slate-400 hover:bg-slate-100" aria-label="Tutup menu"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="px-5 pt-5 pb-2 text-[10px] font-bold tracking-widest text-amber-600 flex items-center gap-2"><i class="fa-solid fa-user-shield"></i><span data-i18n="adminPanel">Panel Admin</span></div>
+      <nav class="px-3 space-y-1 flex-1 overflow-y-auto" aria-label="Navigasi admin">
+        <a href="#/admin" data-nav="/admin" class="admin-link"><i class="fa-solid fa-gauge-high"></i><span data-i18n="adminNavDashboard">Dashboard</span><span id="admin-queue-badge" class="ms-auto hidden min-w-[20px] h-5 px-1.5 rounded-full bg-amber-500 text-slate-900 text-[10px] font-extrabold flex items-center justify-center">0</span></a>
+        <a href="#/admin/bookings" data-nav="/admin/bookings" class="admin-link"><i class="fa-solid fa-table-list"></i><span data-i18n="adminNavBookings">Semua Booking</span></a>
+        <a href="#/admin/jadwal" data-nav="/admin/jadwal" class="admin-link"><i class="fa-solid fa-calendar-days"></i><span data-i18n="adminNavSchedule">Jadwal Kelas</span></a>
+        <a href="#/admin/akun" data-nav="/admin/akun" class="admin-link"><i class="fa-solid fa-users-gear"></i><span data-i18n="adminNavAccounts">Kelola Akun</span></a>
+      </nav>
+      <div class="p-3 border-t border-slate-200 space-y-1 shrink-0">
+        <a href="#/" class="admin-link"><i class="fa-solid fa-arrow-up-right-from-square"></i><span data-i18n="backToPublic">Halaman Utama</span></a>
+        <button type="button" onclick="logout()" class="admin-link w-full text-left !text-rose-600 hover:!bg-rose-50"><i class="fa-solid fa-arrow-right-from-bracket"></i><span data-i18n="navLogout">Keluar</span></button>
+      </div>
+    </aside>
+
+    <div class="flex-1 min-w-0 flex flex-col">
+      <header class="h-16 bg-white border-b border-slate-200 sticky top-0 z-30 px-4 sm:px-6 flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+          <button type="button" onclick="toggleAdminSidebar()" class="lg:hidden w-10 h-10 rounded-lg text-slate-600 hover:bg-slate-100 flex items-center justify-center" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
+          <span class="hidden sm:inline-flex px-2 py-0.5 rounded bg-amber-100 text-amber-800 text-[10px] font-extrabold tracking-wider" data-i18n="adminBadge">ADMIN</span>
+          <h1 id="admin-page-title" class="font-bold text-slate-800 text-base sm:text-lg truncate">Dashboard</h1>
+        </div>
+        <div class="flex items-center gap-2 sm:gap-3">
+          <div class="flex items-center gap-1 text-slate-500">
+            <i class="fa-solid fa-language text-base"></i>
+            <select onchange="changeLanguage(this.value)" class="lang-select h-8 px-1 text-slate-700 text-xs font-semibold rounded-lg bg-transparent border-0 outline-none cursor-pointer" aria-label="Bahasa / Language">
+              <option value="id">ID</option>
+              <option value="en">EN</option>
+            </select>
+          </div>
+          <div id="admin-user-chip" class="flex items-center gap-2"></div>
+        </div>
+      </header>
+
+      <main id="admin-content" class="flex-1 px-4 sm:px-6 lg:px-8 pt-3 sm:pt-4 pb-6 lg:pb-8 space-y-4">
+
+        <!-- DASHBOARD -->
+        <section id="admin-dashboard" class="route-page hidden space-y-4">
+
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div class="bg-white p-3 sm:p-4 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between gap-2">
+              <div class="min-w-0">
+                <p class="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider" data-i18n="statPending">Antrean Menunggu</p>
+                <h3 class="text-2xl font-bold text-amber-600 mt-1" id="stat-pending">0</h3>
+              </div>
+              <div class="hidden sm:flex w-10 h-10 shrink-0 rounded-lg bg-amber-50 text-amber-600 items-center justify-center text-lg"><i class="fa-solid fa-clock"></i></div>
+            </div>
+            <div class="bg-white p-3 sm:p-4 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between gap-2">
+              <div class="min-w-0">
+                <p class="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider" data-i18n="statApproved">Total Terpakai</p>
+                <h3 class="text-2xl font-bold text-blue-600 mt-1" id="stat-approved">0</h3>
+              </div>
+              <div class="hidden sm:flex w-10 h-10 shrink-0 rounded-lg bg-blue-50 text-blue-600 items-center justify-center text-lg"><i class="fa-solid fa-circle-check"></i></div>
+            </div>
+            <div class="bg-white p-3 sm:p-4 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between gap-2">
+              <div class="min-w-0">
+                <p class="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider" data-i18n="statRejected">Ditolak / Batal</p>
+                <h3 class="text-2xl font-bold text-rose-600 mt-1" id="stat-rejected">0</h3>
+              </div>
+              <div class="hidden sm:flex w-10 h-10 shrink-0 rounded-lg bg-rose-50 text-rose-600 items-center justify-center text-lg"><i class="fa-solid fa-circle-xmark"></i></div>
+            </div>
+            <div class="bg-white p-3 sm:p-4 rounded-xl border border-slate-200 shadow-xs flex items-center justify-between gap-2">
+              <div class="min-w-0">
+                <p class="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider" data-i18n="statExpired">Kedaluwarsa</p>
+                <h3 class="text-2xl font-bold text-slate-500 mt-1" id="stat-expired">0</h3>
+              </div>
+              <div class="hidden sm:flex w-10 h-10 shrink-0 rounded-lg bg-slate-100 text-slate-600 items-center justify-center text-lg"><i class="fa-solid fa-hourglass-end"></i></div>
+            </div>
+          </div>
+
+          <!-- ANTREAN PERSETUJUAN -->
+          <div class="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+            <div class="p-4 border-b border-slate-200 flex items-center justify-between gap-3 bg-amber-50/50">
+              <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                <i class="fa-solid fa-clock text-amber-600"></i> <span data-i18n="pendingQueueTitle">Antrean Persetujuan Booking</span>
+              </h3>
+              <span class="text-xs font-semibold px-2.5 py-0.5 bg-amber-100 text-amber-800 rounded-full whitespace-nowrap" id="i3-pending-count-label">0 Pengajuan</span>
+            </div>
+            <div class="hidden md:block overflow-x-auto">
+              <table class="w-full text-left text-xs border-collapse">
+                <thead class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200 uppercase tracking-wider">
+                  <tr>
+                    <th class="p-3" data-i18n="colTime">Waktu Pengajuan</th>
+                    <th class="p-3" data-i18n="colRoom">Kelas</th>
+                    <th class="p-3" data-i18n="colSession">Jadwal Sesi</th>
+                    <th class="p-3" data-i18n="colApplicant">Pemohon & Satker</th>
+                    <th class="p-3" data-i18n="colEvent">Nama Kegiatan</th>
+                    <th class="p-3" data-i18n="colParticipantsVendor">Peserta</th>
+                    <th class="p-3 text-center" data-i18n="colAction">Aksi Verifikasi</th>
+                  </tr>
+                </thead>
+                <tbody id="i3-pending-table-body" class="divide-y divide-slate-200 bg-white"></tbody>
+              </table>
+            </div>
+            <div id="i3-pending-cards" class="md:hidden divide-y divide-slate-200"></div>
+          </div>
+        </section>
+
+        <!-- SEMUA BOOKING -->
+        <section id="admin-bookings" class="route-page hidden space-y-4">
+          <div class="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+            <div class="p-4 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                <i class="fa-solid fa-database text-brand-600"></i> <span data-i18n="historyTitle">Semua Riwayat & Manajemen Booking</span>
+              </h3>
+              <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+                <select id="i3-filter-status-master" onchange="renderInterface3()" class="field !w-auto !py-1.5 !text-xs">
+                  <option value="ALL" data-i18n="allStatusTbl">Semua Status</option>
+                  <option value="Pending" data-i18n="st_Pending">Menunggu Persetujuan</option>
+                  <option value="Approved" data-i18n="st_Approved">Disetujui</option>
+                  <option value="Rejected" data-i18n="st_Rejected">Ditolak</option>
+                  <option value="Cancelled" data-i18n="st_Cancelled">Dibatalkan</option>
+                  <option value="Completed" data-i18n="st_Completed">Selesai</option>
+                  <option value="Expired" data-i18n="st_Expired">Kedaluwarsa</option>
+                </select>
+                <input type="search" id="i3-search-all" oninput="renderInterface3()" placeholder="Cari kegiatan, PIC, Satker..." data-i18n-ph="searchPlaceholderHistory" class="field !py-1.5 !text-xs sm:w-64">
+              </div>
+            </div>
+            <div class="hidden md:block overflow-x-auto">
+              <table class="w-full text-left text-xs border-collapse">
+                <thead class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200 uppercase tracking-wider">
+                  <tr>
+                    <th class="p-3" data-i18n="colId">ID Booking</th>
+                    <th class="p-3" data-i18n="colRoom">Kelas</th>
+                    <th class="p-3" data-i18n="colSession">Sesi Waktu</th>
+                    <th class="p-3" data-i18n="colEvent">Kegiatan</th>
+                    <th class="p-3" data-i18n="colSatker">Satker</th>
+                    <th class="p-3" data-i18n="colPic">PIC</th>
+                    <th class="p-3" data-i18n="colStatus">Status</th>
+                    <th class="p-3 text-center" data-i18n="colManage">Kelola</th>
+                  </tr>
+                </thead>
+                <tbody id="i3-master-table-body" class="divide-y divide-slate-200 bg-white"></tbody>
+              </table>
+            </div>
+            <div id="i3-master-cards" class="md:hidden divide-y divide-slate-200"></div>
+            <div id="i3-master-pager"></div>
+          </div>
+        </section>
+
+        <!-- KELOLA AKUN -->
+        <section id="admin-accounts" class="route-page hidden space-y-4">
+
+          <!-- Tambah admin lewat email -->
+          <div class="bg-white rounded-xl border border-slate-200 shadow-xs p-4 sm:p-5">
+            <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2"><i class="fa-solid fa-user-plus text-amber-600"></i><span data-i18n="accAddTitle">Tambah Admin</span></h3>
+            <p class="text-xs text-slate-500 mt-1" data-i18n="accAddDesc">Masukkan email akun yang akan diberi akses admin. Email boleh belum terdaftar — aksesnya aktif otomatis saat pemilik email mendaftar / masuk.</p>
+            <form id="acc-grant-form" onsubmit="handleGrantAdminSubmit(event)" class="mt-3 flex flex-col sm:flex-row gap-2" novalidate>
+              <input type="email" id="acc-grant-email" autocomplete="off" placeholder="nama@bi.go.id" data-i18n-ph="accAddPh" class="field sm:max-w-md" aria-label="Email">
+              <button type="submit" class="h-[42px] px-5 rounded-lg text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 inline-flex items-center justify-center gap-2 shadow-sm shrink-0"><i class="fa-solid fa-user-shield"></i><span data-i18n="btnGrantAdmin">Jadikan Admin</span></button>
+            </form>
+            <p id="acc-grant-error" class="hidden mt-2 text-xs font-semibold text-rose-800 bg-rose-50 border border-rose-300 rounded-lg px-3 py-2" role="alert"></p>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 sm:gap-4 max-w-md">
+            <div class="bg-white p-3 sm:p-4 rounded-xl border border-slate-200 shadow-xs"><p class="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider" data-i18n="accStatTotal">Email Diberi Akses</p><h3 class="text-2xl font-bold text-slate-800 mt-1" id="acc-stat-total">0</h3></div>
+            <div class="bg-white p-3 sm:p-4 rounded-xl border border-slate-200 shadow-xs"><p class="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider" data-i18n="accStatAdmin">Admin Aktif</p><h3 class="text-2xl font-bold text-amber-600 mt-1" id="acc-stat-admin">0</h3></div>
+          </div>
+
+          <div class="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+            <div class="p-4 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2"><i class="fa-solid fa-users-gear text-brand-600"></i><span data-i18n="accListTitle">Daftar Admin</span></h3>
+              <input type="search" id="acc-search" oninput="renderAccounts()" placeholder="Cari nama / email…" data-i18n-ph="accSearchPh" class="field !py-1.5 !text-xs sm:w-64">
+            </div>
+            <div class="hidden md:block overflow-x-auto">
+              <table class="w-full text-left text-xs border-collapse">
+                <thead class="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200 uppercase tracking-wider">
+                  <tr>
+                    <th class="p-3" data-i18n="accColName">Nama</th>
+                    <th class="p-3" data-i18n="fieldEmail">Email</th>
+                    <th class="p-3" data-i18n="accColMethod">Metode Masuk</th>
+                    <th class="p-3" data-i18n="accColRole">Status</th>
+                    <th class="p-3 text-center" data-i18n="accColAccess">Akses Admin</th>
+                  </tr>
+                </thead>
+                <tbody id="acc-table-body" class="divide-y divide-slate-200 bg-white"></tbody>
+              </table>
+            </div>
+            <div id="acc-cards" class="md:hidden divide-y divide-slate-200"></div>
+            <div id="acc-pager"></div>
+          </div>
+          <p class="text-[11px] text-slate-400"><i class="fa-solid fa-circle-info me-1"></i><span data-i18n="accNote">Hanya email yang Anda masukkan yang mendapat akses admin; akun lain yang terdaftar tidak tampil di sini. Anda tidak dapat mencabut akses Anda sendiri, dan harus selalu ada minimal satu admin.</span></p>
+        </section>
+      </main>
+    </div>
+   </div>
+  </div>
+
+  <!-- MODAL POPUP DIALOGS -->
+  <!-- Pop-up Masuk / Daftar -->
+  <div id="modal-auth" class="modal-overlay fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full border border-slate-100 max-h-[92vh] overflow-y-auto">
+      <div class="relative px-5 pt-6 text-center">
+        <button type="button" onclick="closeModal('modal-auth')" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition" aria-label="Tutup"><i class="fa-solid fa-xmark"></i></button>
+        <img src="src/assets/logo-birama.png" alt="BIRAMA" class="h-24 sm:h-28 w-auto mx-auto mb-3" width="2185" height="720">
+        <h2 id="auth-modal-title" class="text-xl font-bold text-slate-800" data-i18n="authLoginTitle">Masuk ke BIRAMA</h2>
+        <p id="auth-modal-sub" class="text-sm text-slate-500 mt-1" data-i18n="authLoginSub">Masuk untuk memesan ruang kelas dan memantau status booking Anda.</p>
+      </div>
+
+      <div class="p-5 space-y-5">
+        <p id="auth-notice" class="hidden text-xs text-sky-800 bg-sky-50 border border-sky-200 rounded-lg px-3 py-2"></p>
+
+        <div id="auth-oauth-block" class="space-y-5">
+        <div class="space-y-2.5">
+          <button type="button" onclick="handleProviderClick('google', 'auth-provider-error')" class="oauth-btn"><svg class="w-5 h-5 shrink-0" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg><span data-i18n="continueGoogle">Lanjutkan dengan Google</span></button>
+          <p id="auth-provider-error" class="auth-error hidden text-xs font-semibold text-rose-800 bg-rose-50 border border-rose-300 rounded-lg px-3 py-2" role="alert"></p>
+        </div>
+
+        <div class="flex items-center gap-3 text-[11px] uppercase tracking-wider text-slate-400 font-semibold">
+          <span class="flex-1 h-px bg-slate-200"></span><span data-i18n="orWithEmail">atau dengan email</span><span class="flex-1 h-px bg-slate-200"></span>
+        </div>
+        </div>
+
+        <!-- LOGIN -->
+        <div id="auth-pane-login">
+          <form id="login-form" onsubmit="handleLoginSubmit(event)" class="space-y-4" novalidate>
+            <p class="text-[11px] text-slate-500"><span class="text-rose-600 font-bold">*</span> <span data-i18n="requiredNote">wajib diisi</span></p>
+            <div>
+              <label for="login-email" class="field-label req req" data-i18n="fieldEmail">Email</label>
+              <input type="email" id="login-email" autocomplete="username" required placeholder="nama@bi.go.id" class="field">
+            </div>
+            <div>
+              <label for="login-password" class="field-label req req" data-i18n="fieldPassword">Kata Sandi</label>
+              <div class="relative">
+                <input type="password" id="login-password" autocomplete="current-password" required class="field !pe-10">
+                <button type="button" onclick="togglePassword(this)" class="absolute right-0 top-0 h-full w-10 text-slate-400 hover:text-slate-600" aria-label="Show / hide password"><i class="fa-solid fa-eye"></i></button>
+              </div>
+            </div>
+            <div class="text-right -mt-2"><button type="button" onclick="switchAuthMode('forgot')" class="text-xs font-semibold text-brand-600 hover:underline" data-i18n="linkForgotPassword">Lupa kata sandi?</button></div>
+            <p id="login-error" class="auth-error hidden text-xs font-semibold text-rose-800 bg-rose-50 border border-rose-300 rounded-lg px-3 py-2" role="alert"></p>
+            <div id="login-unverified" class="hidden text-xs bg-amber-50 border border-amber-300 text-amber-900 rounded-lg px-3 py-2 space-y-2">
+              <p data-i18n="errEmailNotVerified">Email Anda belum diverifikasi. Cek kotak masuk Anda atau kirim ulang email verifikasi.</p>
+              <button type="button" onclick="handleResendVerification('login-email')" class="font-semibold text-brand-700 hover:underline" data-i18n="btnResendVerification">Kirim ulang email verifikasi</button>
+            </div>
+            <button type="submit" class="w-full h-11 bg-brand-600 hover:bg-brand-700 disabled:opacity-60 text-white text-sm font-semibold rounded-lg shadow-sm transition" data-i18n="btnLogin">Masuk</button>
+          </form>
+          <p class="text-sm text-slate-500 mt-4 text-center"><span data-i18n="noAccount">Belum punya akun?</span> <button type="button" onclick="switchAuthMode('register')" class="font-semibold text-brand-600 hover:underline" data-i18n="linkRegisterNow">Daftar sekarang</button></p>
+        </div>
+
+        <!-- REGISTER -->
+        <div id="auth-pane-register" class="hidden">
+          <form id="register-form" onsubmit="handleRegisterSubmit(event)" class="space-y-4" novalidate>
+            <p class="text-[11px] text-slate-500"><span class="text-rose-600 font-bold">*</span> <span data-i18n="requiredNote">wajib diisi</span></p>
+            <div>
+              <label for="reg-name" class="field-label req req" data-i18n="fieldFullName">Nama Lengkap</label>
+              <input type="text" id="reg-name" autocomplete="name" required class="field">
+            </div>
+            <div>
+              <label for="reg-email" class="field-label req req" data-i18n="fieldEmail">Email</label>
+              <input type="email" id="reg-email" autocomplete="email" required placeholder="nama@bi.go.id" class="field">
+            </div>
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label for="reg-satker" class="field-label" data-i18n="fieldSatkerOpt">Satker / Divisi (opsional)</label>
+                <input type="text" id="reg-satker" autocomplete="organization" class="field">
+              </div>
+              <div>
+                <label for="reg-phone" class="field-label" data-i18n="fieldPhoneOpt">No. WhatsApp (opsional)</label>
+                <input type="tel" id="reg-phone" autocomplete="tel" class="field">
+              </div>
+            </div>
+            <div>
+              <label for="reg-password" class="field-label req req" data-i18n="fieldPassword">Kata Sandi</label>
+              <div class="relative">
+                <input type="password" id="reg-password" autocomplete="new-password" required minlength="10" class="field !pe-10">
+                <button type="button" onclick="togglePassword(this)" class="absolute right-0 top-0 h-full w-10 text-slate-400 hover:text-slate-600" aria-label="Show / hide password"><i class="fa-solid fa-eye"></i></button>
+              </div>
+              <p class="text-[11px] text-slate-400 mt-1" data-i18n="passwordHint">Minimal 10 karakter</p>
+            </div>
+            <div>
+              <label for="reg-confirm" class="field-label req req" data-i18n="fieldPasswordConfirm">Konfirmasi Kata Sandi</label>
+              <div class="relative">
+                <input type="password" id="reg-confirm" autocomplete="new-password" required class="field !pe-10">
+                <button type="button" onclick="togglePassword(this)" class="absolute right-0 top-0 h-full w-10 text-slate-400 hover:text-slate-600" aria-label="Show / hide password confirmation"><i class="fa-solid fa-eye"></i></button>
+              </div>
+            </div>
+            <p id="register-error" class="auth-error hidden text-xs font-semibold text-rose-800 bg-rose-50 border border-rose-300 rounded-lg px-3 py-2" role="alert"></p>
+            <button type="submit" class="w-full h-11 bg-brand-600 hover:bg-brand-700 disabled:opacity-60 text-white text-sm font-semibold rounded-lg shadow-sm transition" data-i18n="btnRegister">Daftar</button>
+          </form>
+          <p class="text-sm text-slate-500 mt-4 text-center"><span data-i18n="haveAccount">Sudah punya akun?</span> <button type="button" onclick="switchAuthMode('login')" class="font-semibold text-brand-600 hover:underline" data-i18n="linkLoginNow">Masuk</button></p>
+        </div>
+
+        <!-- LUPA KATA SANDI -->
+        <div id="auth-pane-forgot" class="hidden">
+          <form id="forgot-form" onsubmit="handleForgotSubmit(event)" class="space-y-4" novalidate>
+            <div>
+              <label for="forgot-email" class="field-label req" data-i18n="fieldEmail">Email</label>
+              <input type="email" id="forgot-email" autocomplete="username" required placeholder="nama@bi.go.id" class="field">
+            </div>
+            <p id="forgot-error" class="auth-error hidden text-xs font-semibold text-rose-800 bg-rose-50 border border-rose-300 rounded-lg px-3 py-2" role="alert"></p>
+            <p id="forgot-success" class="hidden text-xs font-semibold text-emerald-800 bg-emerald-50 border border-emerald-300 rounded-lg px-3 py-2" role="status"></p>
+            <button type="submit" class="w-full h-11 bg-brand-600 hover:bg-brand-700 disabled:opacity-60 text-white text-sm font-semibold rounded-lg shadow-sm transition" data-i18n="btnSendResetLink">Kirim tautan reset</button>
+          </form>
+          <p class="text-sm text-slate-500 mt-4 text-center"><button type="button" onclick="switchAuthMode('login')" class="font-semibold text-brand-600 hover:underline" data-i18n="linkBackToLogin">Kembali ke halaman masuk</button></p>
+        </div>
+
+        <!-- RESET KATA SANDI (dibuka dari tautan email) -->
+        <div id="auth-pane-reset" class="hidden">
+          <form id="reset-form" onsubmit="handleResetSubmit(event)" class="space-y-4" novalidate>
+            <div>
+              <label for="reset-password" class="field-label req" data-i18n="fieldNewPassword">Kata Sandi Baru</label>
+              <div class="relative">
+                <input type="password" id="reset-password" autocomplete="new-password" required minlength="10" class="field !pe-10">
+                <button type="button" onclick="togglePassword(this)" class="absolute right-0 top-0 h-full w-10 text-slate-400 hover:text-slate-600" aria-label="Show / hide password"><i class="fa-solid fa-eye"></i></button>
+              </div>
+              <p class="text-[11px] text-slate-400 mt-1" data-i18n="passwordHint">Minimal 10 karakter</p>
+            </div>
+            <div>
+              <label for="reset-confirm" class="field-label req" data-i18n="fieldPasswordConfirm">Konfirmasi Kata Sandi</label>
+              <div class="relative">
+                <input type="password" id="reset-confirm" autocomplete="new-password" required class="field !pe-10">
+                <button type="button" onclick="togglePassword(this)" class="absolute right-0 top-0 h-full w-10 text-slate-400 hover:text-slate-600" aria-label="Show / hide password confirmation"><i class="fa-solid fa-eye"></i></button>
+              </div>
+            </div>
+            <p id="reset-error" class="auth-error hidden text-xs font-semibold text-rose-800 bg-rose-50 border border-rose-300 rounded-lg px-3 py-2" role="alert"></p>
+            <button type="submit" class="w-full h-11 bg-brand-600 hover:bg-brand-700 disabled:opacity-60 text-white text-sm font-semibold rounded-lg shadow-sm transition" data-i18n="btnResetPassword">Simpan kata sandi baru</button>
+          </form>
+          <p class="text-sm text-slate-500 mt-4 text-center"><button type="button" onclick="switchAuthMode('forgot')" class="font-semibold text-brand-600 hover:underline" data-i18n="linkRequestNewLink">Minta tautan baru</button></p>
+        </div>
+
+        <!-- CEK EMAIL (setelah registrasi / verifikasi gagal) -->
+        <div id="auth-pane-verify" class="hidden space-y-4">
+          <div class="flex items-start gap-3 bg-sky-50 border border-sky-200 rounded-xl p-3">
+            <i class="fa-solid fa-envelope-circle-check text-sky-600 text-lg mt-0.5"></i>
+            <p id="verify-message" class="text-sm text-sky-900"></p>
+          </div>
+          <p id="verify-error" class="auth-error hidden text-xs font-semibold text-rose-800 bg-rose-50 border border-rose-300 rounded-lg px-3 py-2" role="alert"></p>
+          <p id="verify-success" class="hidden text-xs font-semibold text-emerald-800 bg-emerald-50 border border-emerald-300 rounded-lg px-3 py-2" role="status"></p>
+          <input type="hidden" id="verify-email-value">
+          <button type="button" onclick="handleResendVerification('verify-email-value')" class="w-full h-11 border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm font-semibold rounded-lg transition" data-i18n="btnResendVerification">Kirim ulang email verifikasi</button>
+          <p class="text-sm text-slate-500 text-center"><button type="button" onclick="switchAuthMode('login')" class="font-semibold text-brand-600 hover:underline" data-i18n="linkBackToLogin">Kembali ke halaman masuk</button></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Konfirmasi Ubah Role (Kelola Akun) -->
+  <div id="modal-role-confirm" class="modal-overlay fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-5 space-y-4 border border-slate-100">
+      <div class="flex items-start gap-3">
+        <div id="role-confirm-icon" class="w-10 h-10 shrink-0 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center"><i class="fa-solid fa-user-shield"></i></div>
+        <div>
+          <h3 id="role-confirm-title" class="font-bold text-slate-800 text-sm"></h3>
+          <p id="role-confirm-desc" class="text-xs text-slate-500 mt-1"></p>
+        </div>
+      </div>
+      <div id="role-confirm-user" class="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs"></div>
+      <input type="hidden" id="role-confirm-email"><input type="hidden" id="role-confirm-role">
+      <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
+        <button type="button" onclick="closeModal('modal-role-confirm')" class="h-10 px-4 border border-slate-300 text-slate-700 text-xs font-semibold rounded-lg hover:bg-slate-50" data-i18n="btnCancel">Batal</button>
+        <button type="button" id="role-confirm-btn" onclick="confirmRoleChange()" class="h-10 px-4 text-white text-xs font-semibold rounded-lg shadow-sm"></button>
+      </div>
+    </div>
+  </div>
+
+  
+    <!-- Modal Booking Form Popup -->
+  <div id="modal-booking-form-popup" class="modal-overlay fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-100 animate-in fade-in zoom-in duration-150">
+      <div class="bg-brand-600 text-white p-4 flex items-center justify-between">
+        <div>
+          <h3 class="font-bold text-base" id="pop-form-room-name" data-i18n="formBookingTitle">Form Booking Ruang Kelas</h3>
+          <p class="text-xs text-brand-100" id="pop-form-room-sub" data-i18n="formSubtitle">Isi formulir reservasi di bawah ini</p>
+        </div>
+        <button onclick="closeModal('modal-booking-form-popup')" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <form onsubmit="handleBookingSubmit(event)" class="p-5 space-y-4 max-h-[80vh] overflow-y-auto" novalidate>
+        <input type="hidden" id="f-room-id">
+        <div id="f-form-error" class="hidden flex items-start gap-2 bg-rose-50 border border-rose-300 text-rose-800 rounded-lg px-3 py-2 text-xs font-semibold" role="alert"><i class="fa-solid fa-circle-exclamation mt-0.5"></i><span></span></div>
+        <p class="text-[11px] text-slate-500"><span class="text-rose-600 font-bold">*</span> <span data-i18n="requiredNote">wajib diisi</span></p>
+        
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1 req" data-i18n="formBookingDate">Tanggal Booking</label>
+          <input type="date" id="f-date" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-medium outline-none focus:ring-2 focus:ring-brand-500">
+        </div>
+
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <label class="block text-xs font-semibold text-slate-700 req" data-i18n="formStartTime">Sesi Jam</label>
+            <label class="inline-flex items-center gap-1.5 cursor-pointer">
+              <input type="checkbox" id="f-allday" onchange="toggleAllDayBooking('f')" class="rounded border-slate-300 text-brand-600 focus:ring-brand-500">
+              <span class="text-xs font-medium text-slate-600" data-i18n="formAllDay">Sepanjang Hari</span>
+            </label>
+          </div>
+          <div id="f-time-fields-container" class="grid grid-cols-2 gap-3">
+            <div>
+              <span class="block text-[10px] text-slate-400 font-medium mb-1" data-i18n="formStartTime">Jam Mulai</span>
+              <div class="flex items-center gap-1">
+                <select id="f-start-hour" onchange="syncFormTimeValues()" class="w-full px-2 py-1.5 border border-slate-300 rounded-lg text-xs outline-none bg-white font-semibold">
+                </select>
+                <span class="font-bold text-xs text-slate-400">:</span>
+                <select id="f-start-minute" onchange="syncFormTimeValues()" class="w-full px-2 py-1.5 border border-slate-300 rounded-lg text-xs outline-none bg-white font-semibold">
+                  <option value="00">00</option>
+                  <option value="15">15</option>
+                  <option value="30">30</option>
+                  <option value="45">45</option>
+                </select>
+              </div>
+              <input type="hidden" id="f-start-time" value="08:00">
+            </div>
+            <div>
+              <span class="block text-[10px] text-slate-400 font-medium mb-1" data-i18n="formEndTime">Jam Selesai</span>
+              <div class="flex items-center gap-1">
+                <select id="f-end-hour" onchange="syncFormTimeValues()" class="w-full px-2 py-1.5 border border-slate-300 rounded-lg text-xs outline-none bg-white font-semibold">
+                </select>
+                <span class="font-bold text-xs text-slate-400">:</span>
+                <select id="f-end-minute" onchange="syncFormTimeValues()" class="w-full px-2 py-1.5 border border-slate-300 rounded-lg text-xs outline-none bg-white font-semibold">
+                  <option value="00">00</option>
+                  <option value="15">15</option>
+                  <option value="30">30</option>
+                  <option value="45">45</option>
+                </select>
+              </div>
+              <input type="hidden" id="f-end-time" value="12:00">
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1 req" data-i18n="formEventName">Nama Kegiatan</label>
+          <input type="text" id="f-event" required placeholder="Contoh: Workshop Digital Banking BI" data-i18n-ph="formEventPlaceholder" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-brand-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1 req" data-i18n="formParticipants">Jumlah Peserta</label>
+            <input type="number" id="f-participants" required placeholder="30" data-i18n-ph="formParticipantsPlaceholder" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-brand-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1" data-i18n="formVendor">Pihak Eksternal/Vendor</label>
+            <select id="f-vendor" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none bg-white">
+              <option value="Tidak" data-i18n="vendorNo">Tidak Ada</option>
+              <option value="Ada" data-i18n="vendorYes">Ada Pihak Eksternal/Vendor</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="pt-2 border-t border-slate-200">
+          <p class="text-xs font-bold text-slate-800 mb-2" data-i18n="formPicHeader">Penanggung Jawab / Pemohon</p>
+          <div class="space-y-3">
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-600 mb-0.5 req" data-i18n="formSatker">Instansi / Satker - Divisi</label>
+              <input type="text" id="f-satker" required placeholder="Departemen SDM BI" data-i18n-ph="formSatkerPlaceholder" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-brand-500">
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-600 mb-0.5 req" data-i18n="formPicName">Nama PIC</label>
+              <input type="text" id="f-pic-name" required placeholder="Nama Lengkap" data-i18n-ph="formPicNamePlaceholder" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-brand-500">
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-600 mb-0.5 req" data-i18n="formContact">No. Kontak / WA</label>
+                <input type="tel" id="f-pic-contact" required inputmode="tel" maxlength="16" autocomplete="tel" placeholder="0812xxxxxxxx" data-i18n-ph="formContactPlaceholder" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-brand-500">
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-600 mb-0.5 req" data-i18n="formEmail">Email Aktif</label>
+                <input type="email" id="f-email" required placeholder="nama@bi.go.id" data-i18n-ph="formEmailPlaceholder" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-brand-500">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-4 flex justify-end gap-2">
+          <button type="button" onclick="closeModal('modal-booking-form-popup')" class="px-4 py-2 border border-slate-300 text-slate-700 text-xs font-semibold rounded-lg hover:bg-slate-50 transition" data-i18n="btnCancel">Batal</button>
+          <button type="submit" class="px-5 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold rounded-lg shadow-sm transition" data-i18n="btnSubmitBooking">Kirim Pengajuan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Schedule Timeline View -->
+  <div id="modal-schedule-view" class="modal-overlay fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full overflow-hidden border border-slate-100 flex flex-col max-h-[90vh]">
+      <div class="p-4 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800">
+        <div class="flex items-center gap-3">
+          <img id="sv-room-img-thumb" src="" alt="Room Thumb" class="w-12 h-12 rounded-lg object-cover border border-slate-700">
+          <div>
+            <h3 class="font-bold text-base leading-tight" id="sv-room-title">Nama Ruang</h3>
+            <p class="text-xs text-slate-400" id="sv-room-sub">Lokasi Gedung • Kapasitas 40 Orang</p>
+          </div>
+        </div>
+        <button onclick="closeModal('modal-schedule-view')" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-300 transition"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="p-3 bg-slate-100 border-b border-slate-200 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <button onclick="scheduleNavDate(-1)" class="px-2.5 py-1 bg-white border border-slate-300 rounded text-xs text-slate-700 hover:bg-slate-50"><i class="fa-solid fa-chevron-left"></i></button>
+          <button onclick="scheduleNavToday()" class="px-3 py-1 bg-white border border-slate-300 rounded text-xs font-semibold text-slate-700 hover:bg-slate-50" data-i18n="btnToday">Hari Ini</button>
+          <button onclick="scheduleNavDate(1)" class="px-2.5 py-1 bg-white border border-slate-300 rounded text-xs text-slate-700 hover:bg-slate-50"><i class="fa-solid fa-chevron-right"></i></button>
+          <span class="text-xs font-bold text-slate-800 ms-2" id="u-schedule-date-display">Senin, 19 Oktober 2026</span>
+        </div>
+        <div class="flex items-center gap-2 text-xs">
+          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span> <span data-i18n="statusOccupied">Terpakai</span></span>
+          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span> <span data-i18n="statusPendingSlot">Slot Menunggu</span></span>
+        </div>
+      </div>
+
+      <!-- Timeline Schedule Header Row -->
+      <div class="grid grid-cols-12 bg-slate-50 border-b border-slate-200 text-xs font-bold text-slate-600 py-2 px-4">
+        <div class="col-span-2 text-right pr-3" data-i18n="timeLabel">GMT +7 WIB</div>
+        <div class="col-span-10 flex items-center justify-between">
+          <span id="u-schedule-room-name">Ahmad Dahlan</span>
+          <div class="flex items-center gap-1 text-[11px] text-slate-500 font-normal">
+            <span id="u-schedule-avatar" class="w-5 h-5 rounded-full bg-brand-600 text-white text-[9px] font-bold flex items-center justify-center">AD</span>
+            <span>Jadwal Kelas</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Timeline 24 Hour Scroll Body -->
+      <div class="flex-1 overflow-y-auto p-4 bg-slate-50/50 relative">
+        <div class="grid grid-cols-12 min-h-[1152px] relative">
+          <!-- Hours Labels Column -->
+          <div id="u-schedule-hours-col" class="col-span-2 pr-0 text-slate-400 text-[11px] select-none">
+          </div>
+          <!-- Events Container Column -->
+          <div id="u-schedule-events-container" class="col-span-10 relative border-l border-slate-300/80">
+            <div id="sv-current-time-indicator" class="absolute left-0 right-0 z-30 pointer-events-none hidden">
+              <div class="absolute -left-1.5 -top-1.5 w-3 h-3 bg-red-600 rounded-full shadow-sm"></div>
+              <div class="border-b-2 border-red-600 w-full"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Direct Booking Modal -->
+  <div id="modal-direct-booking-popup" class="modal-overlay fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-100 animate-in fade-in zoom-in duration-150">
+      <div class="bg-brand-600 text-white p-4 flex items-center justify-between">
+        <div>
+          <h3 class="font-bold text-base" id="df-modal-title" data-i18n="directBookingTitle">Formulir Booking Kelas Baru</h3>
+          <p class="text-xs text-brand-100" id="df-modal-subtitle" data-i18n="directBookingSubtitle">Pilih ruang kelas dan isi detail kegiatan Anda</p>
+        </div>
+        <button onclick="closeModal('modal-direct-booking-popup')" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <form onsubmit="handleDirectBookingSubmit(event)" class="p-5 space-y-4 max-h-[80vh] overflow-y-auto" novalidate>
+        <div id="df-form-error" class="hidden flex items-start gap-2 bg-rose-50 border border-rose-300 text-rose-800 rounded-lg px-3 py-2 text-xs font-semibold" role="alert"><i class="fa-solid fa-circle-exclamation mt-0.5"></i><span></span></div>
+        <p class="text-[11px] text-slate-500"><span class="text-rose-600 font-bold">*</span> <span data-i18n="requiredNote">wajib diisi</span></p>
+        
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1 req" data-i18n="selectRoomLabel">Pilih Ruang Kelas</label>
+          <select id="df-room-id" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-semibold outline-none focus:ring-2 focus:ring-brand-500 bg-white">
+            <option value="" data-i18n="selectRoomDefault">-- Pilih Ruang Kelas --</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1 req" data-i18n="formBookingDate">Tanggal Booking</label>
+          <input type="date" id="df-date" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-medium outline-none focus:ring-2 focus:ring-brand-500">
+        </div>
+
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <label class="block text-xs font-semibold text-slate-700 req" data-i18n="formStartTime">Sesi Jam</label>
+            <label class="inline-flex items-center gap-1.5 cursor-pointer">
+              <input type="checkbox" id="df-allday" onchange="toggleAllDayBooking('df')" class="rounded border-slate-300 text-brand-600 focus:ring-brand-500">
+              <span class="text-xs font-medium text-slate-600" data-i18n="formAllDay">Sepanjang Hari</span>
+            </label>
+          </div>
+          <div id="df-time-fields-container" class="grid grid-cols-2 gap-3">
+            <div>
+              <span class="block text-[10px] text-slate-400 font-medium mb-1" data-i18n="formStartTime">Jam Mulai</span>
+              <div class="flex items-center gap-1">
+                <select id="df-start-hour" onchange="syncDirectFormTimeValues()" class="w-full px-2 py-1.5 border border-slate-300 rounded-lg text-xs outline-none bg-white font-semibold">
+                </select>
+                <span class="font-bold text-xs text-slate-400">:</span>
+                <select id="df-start-minute" onchange="syncDirectFormTimeValues()" class="w-full px-2 py-1.5 border border-slate-300 rounded-lg text-xs outline-none bg-white font-semibold">
+                  <option value="00">00</option>
+                  <option value="15">15</option>
+                  <option value="30">30</option>
+                  <option value="45">45</option>
+                </select>
+              </div>
+              <input type="hidden" id="df-start-time" value="08:00">
+            </div>
+            <div>
+              <span class="block text-[10px] text-slate-400 font-medium mb-1" data-i18n="formEndTime">Jam Selesai</span>
+              <div class="flex items-center gap-1">
+                <select id="df-end-hour" onchange="syncDirectFormTimeValues()" class="w-full px-2 py-1.5 border border-slate-300 rounded-lg text-xs outline-none bg-white font-semibold">
+                </select>
+                <span class="font-bold text-xs text-slate-400">:</span>
+                <select id="df-end-minute" onchange="syncDirectFormTimeValues()" class="w-full px-2 py-1.5 border border-slate-300 rounded-lg text-xs outline-none bg-white font-semibold">
+                  <option value="00">00</option>
+                  <option value="15">15</option>
+                  <option value="30">30</option>
+                  <option value="45">45</option>
+                </select>
+              </div>
+              <input type="hidden" id="df-end-time" value="12:00">
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1 req" data-i18n="formEventName">Nama Kegiatan</label>
+          <input type="text" id="df-event" required placeholder="Contoh: Workshop Digital Banking BI" data-i18n-ph="formEventPlaceholder" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-brand-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1 req" data-i18n="formParticipants">Jumlah Peserta</label>
+            <input type="number" id="df-participants" required placeholder="30" data-i18n-ph="formParticipantsPlaceholder" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-brand-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1" data-i18n="formVendor">Pihak Eksternal/Vendor</label>
+            <select id="df-vendor" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none bg-white">
+              <option value="Tidak" data-i18n="vendorNo">Tidak Ada</option>
+              <option value="Ada" data-i18n="vendorYes">Ada Pihak Eksternal/Vendor</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="pt-2 border-t border-slate-200">
+          <p class="text-xs font-bold text-slate-800 mb-2" data-i18n="formPicHeader">Penanggung Jawab / Pemohon</p>
+          <div class="space-y-3">
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-600 mb-0.5 req" data-i18n="formSatker">Instansi / Satker - Divisi</label>
+              <input type="text" id="df-satker" required placeholder="Departemen SDM BI" data-i18n-ph="formSatkerPlaceholder" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-brand-500">
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-600 mb-0.5 req" data-i18n="formPicName">Nama PIC</label>
+              <input type="text" id="df-pic-name" required placeholder="Nama Lengkap" data-i18n-ph="formPicNamePlaceholder" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-brand-500">
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-600 mb-0.5 req" data-i18n="formContact">No. Kontak / WA</label>
+                <input type="tel" id="df-pic-contact" required inputmode="tel" maxlength="16" autocomplete="tel" placeholder="0812xxxxxxxx" data-i18n-ph="formContactPlaceholder" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-brand-500">
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-slate-600 mb-0.5 req" data-i18n="formEmail">Email Aktif</label>
+                <input type="email" id="df-email" required placeholder="nama@bi.go.id" data-i18n-ph="formEmailPlaceholder" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-brand-500">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-4 flex justify-end gap-2">
+          <button type="button" onclick="closeModal('modal-direct-booking-popup')" class="px-4 py-2 border border-slate-300 text-slate-700 text-xs font-semibold rounded-lg hover:bg-slate-50 transition" data-i18n="btnCancel">Batal</button>
+          <button type="submit" id="df-submit-btn" class="px-5 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold rounded-lg shadow-sm transition" data-i18n="btnSubmitBooking">Kirim Pengajuan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Detail & Pelacakan Booking -->
+  <div id="modal-booking-detail" class="modal-overlay fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-100 flex flex-col max-h-[92vh]">
+      <div class="p-4 bg-slate-900 text-white flex items-start justify-between gap-3 shrink-0">
+        <div class="min-w-0">
+          <p class="text-[10px] uppercase tracking-widest text-slate-400 font-bold" data-i18n="trackTitle">Lacak Booking</p>
+          <h3 class="font-bold text-base mt-0.5 font-mono" id="d-id">BK-2026-001</h3>
+          <div class="mt-1.5" id="d-status-badge"></div>
+        </div>
+        <button type="button" onclick="closeModal('modal-booking-detail')" class="w-8 h-8 shrink-0 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-300 transition" aria-label="Tutup"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="p-5 space-y-5 text-xs overflow-y-auto">
+        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
+          <div class="flex justify-between gap-3"><span class="text-slate-500" data-i18n="detailRoom">Ruang Kelas</span><span class="font-bold text-slate-900 text-right" id="d-room">--</span></div>
+          <div class="flex justify-between gap-3"><span class="text-slate-500" data-i18n="detailLocation">Gedung / Lantai</span><span class="font-medium text-slate-800 text-right" id="d-location">--</span></div>
+          <div class="flex justify-between gap-3"><span class="text-slate-500" data-i18n="detailDate">Tanggal</span><span class="font-medium text-slate-800 text-right" id="d-date">--</span></div>
+          <div class="flex justify-between gap-3"><span class="text-slate-500" data-i18n="detailTime">Sesi Jam</span><span class="font-mono font-bold text-brand-600 text-right" id="d-time">--</span></div>
+        </div>
+
+        <div class="space-y-2">
+          <div class="flex justify-between gap-3"><span class="text-slate-500 shrink-0" data-i18n="detailEvent">Nama Kegiatan</span><span class="font-semibold text-slate-900 text-right break-words min-w-0" id="d-event">--</span></div>
+          <div class="flex justify-between gap-3"><span class="text-slate-500" data-i18n="detailParticipants">Jumlah Peserta</span><span class="font-semibold text-slate-800 text-right" id="d-participants">--</span></div>
+          <div class="flex justify-between gap-3"><span class="text-slate-500 shrink-0" data-i18n="detailSatker">Satker / Instansi</span><span class="font-semibold text-slate-800 text-right break-words min-w-0" id="d-satker">--</span></div>
+          <div class="flex justify-between gap-3"><span class="text-slate-500" data-i18n="detailVendor">Vendor / Eksternal</span><span class="font-semibold text-slate-800 text-right" id="d-vendor">--</span></div>
+          <div class="flex justify-between gap-3"><span class="text-slate-500" data-i18n="createdAt">Diajukan</span><span class="font-mono text-slate-700 text-right" id="d-created">--</span></div>
+        </div>
+
+        <div id="d-pic-section" class="hidden space-y-2 bg-amber-50/60 p-3 rounded-xl border border-amber-200">
+          <p class="font-bold text-amber-900 flex items-center gap-1.5"><i class="fa-solid fa-user-shield text-amber-600"></i><span data-i18n="detailPicHeader">Detail PIC (Tampilan Admin)</span></p>
+          <div class="flex justify-between gap-3"><span class="text-slate-600" data-i18n="detailPicName">Nama PIC</span><span class="font-bold text-slate-900 text-right" id="d-pic-name">--</span></div>
+          <div class="flex justify-between gap-3"><span class="text-slate-600" data-i18n="detailPicContact">No. Kontak</span><span class="font-mono text-slate-800 text-right" id="d-pic-contact">--</span></div>
+          <div class="flex justify-between gap-3"><span class="text-slate-600" data-i18n="detailApplicantEmail">Email Pemesan</span><span class="font-mono text-slate-800 text-right break-all" id="d-applicant-email">--</span></div>
+        </div>
+
+        <div>
+          <p class="font-bold text-slate-800 mb-3 flex items-center gap-1.5 text-xs"><i class="fa-solid fa-route text-brand-600"></i><span data-i18n="trackProgress">Progres Pengajuan</span></p>
+          <div id="d-timeline"></div>
+        </div>
+      </div>
+
+      <div class="p-4 border-t border-slate-200 bg-white flex flex-col-reverse sm:flex-row sm:justify-end gap-2 shrink-0">
+        <p id="d-cancel-locked" class="hidden text-[11px] text-slate-400 self-center me-auto"><i class="fa-solid fa-lock me-1"></i><span data-i18n="cancelHintLocked">Tidak dapat dibatalkan setelah sesi dimulai</span></p>
+        <button type="button" onclick="closeModal('modal-booking-detail')" class="h-10 px-4 border border-slate-300 text-slate-700 rounded-lg font-semibold hover:bg-slate-50 transition text-xs" data-i18n="btnClose">Tutup</button>
+        <button type="button" id="d-edit-btn" class="hidden h-10 px-4 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-semibold transition text-xs"><i class="fa-solid fa-pen-to-square me-1.5"></i><span data-i18n="btnEdit">Edit</span></button>
+        <button type="button" id="d-cancel-btn" class="hidden h-10 px-4 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-semibold transition text-xs"><i class="fa-solid fa-ban me-1.5"></i><span data-i18n="btnCancelBooking">Batalkan</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Konfirmasi Pembatalan Booking -->
+  <div id="modal-cancel-booking" class="modal-overlay fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-5 space-y-4 border border-slate-100 max-h-[92vh] overflow-y-auto">
+      <div class="flex items-start gap-3">
+        <div class="w-10 h-10 shrink-0 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        <div>
+          <h3 class="font-bold text-slate-800 text-sm" data-i18n="cancelTitle">Batalkan Booking?</h3>
+          <p class="text-xs text-slate-500 mt-1" data-i18n="cancelDesc">Slot akan dilepas dan dapat dipesan pihak lain. Tindakan ini tidak dapat dibatalkan.</p>
+        </div>
+      </div>
+      <input type="hidden" id="cancel-booking-id">
+      <div id="cancel-summary" class="bg-slate-50 border border-slate-200 rounded-xl p-3"></div>
+      <div>
+        <label for="cancel-reason-text" class="block text-xs font-semibold text-slate-700 mb-1" data-i18n="cancelReasonLabel">Alasan pembatalan (opsional)</label>
+        <textarea id="cancel-reason-text" placeholder="Contoh: kegiatan diundur" data-i18n-ph="cancelReasonPh" class="field h-20"></textarea>
+      </div>
+      <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
+        <button type="button" onclick="closeModal('modal-cancel-booking')" class="h-10 px-4 border border-slate-300 text-slate-700 text-xs font-semibold rounded-lg hover:bg-slate-50 transition" data-i18n="cancelKeep">Tidak, Pertahankan</button>
+        <button type="button" onclick="confirmCancelBooking()" class="h-10 px-4 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-lg shadow-sm transition" data-i18n="cancelConfirm">Ya, Batalkan Booking</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Reject Reason Input -->
+  <div id="modal-reject-reason" class="modal-overlay fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-5 space-y-4 border border-slate-100">
+      <h3 class="font-bold text-slate-800 text-sm" data-i18n="rejectTitle">Alasan Penolakan Booking</h3>
+      <input type="hidden" id="reject-booking-id">
+      <textarea id="reject-reason-text" placeholder="Masukkan alasan penolakan..." data-i18n-ph="rejectPh" class="field h-24"></textarea>
+      <div class="flex justify-end gap-2">
+        <button type="button" onclick="closeModal('modal-reject-reason')" class="h-10 px-3 border border-slate-300 text-slate-700 text-xs font-semibold rounded-lg hover:bg-slate-50 transition" data-i18n="btnCancel">Batal</button>
+        <button type="button" onclick="submitRejectBooking()" class="h-10 px-4 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-lg shadow-sm transition" data-i18n="rejectBtn">Tolak Booking</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Simulasi Login Google (aktif bila client ID belum diisi di src/config.js) -->
+  <div id="modal-oauth-sim" class="modal-overlay fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-5 space-y-4 border border-slate-100">
+      <div>
+        <h3 class="font-bold text-slate-800 text-sm" id="sim-title">Simulasi masuk</h3>
+        <p class="text-[11px] text-slate-500 mt-1 bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5" id="sim-note"></p>
+      </div>
+      <form id="sim-form" onsubmit="handleSimSubmit(event)" class="space-y-3" novalidate>
+        <div>
+          <label for="sim-name" class="field-label req" data-i18n="simName">Nama</label>
+          <input type="text" id="sim-name" class="field" autocomplete="off" required>
+        </div>
+        <div>
+          <label for="sim-email" class="field-label req" data-i18n="fieldEmail">Email</label>
+          <input type="email" id="sim-email" class="field" autocomplete="off" required>
+        </div>
+        <p id="sim-error" class="hidden text-xs text-rose-700 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2" role="alert"></p>
+        <div class="flex justify-end gap-2 pt-1">
+          <button type="button" onclick="closeModal('modal-oauth-sim')" class="h-10 px-3 border border-slate-300 text-slate-700 text-xs font-semibold rounded-lg hover:bg-slate-50" data-i18n="btnCancel">Batal</button>
+          <button type="submit" class="h-10 px-4 bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold rounded-lg" data-i18n="simContinue">Lanjutkan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Gallery Zoom Lightbox Modal -->
+  <div id="modal-gallery-zoom" class="modal-overlay modal-overlay-plain fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <button onclick="closeModal('modal-gallery-zoom')" class="absolute top-5 right-5 text-white/80 hover:text-white text-2xl z-50 p-2"><i class="fa-solid fa-xmark"></i></button>
+    <div class="relative max-w-4xl w-full flex flex-col items-center">
+      <img id="z-image-main" src="" alt="Zoom Gallery" class="max-h-[75vh] w-auto object-contain rounded-xl shadow-2xl">
+      <button onclick="navigateGallery(-1)" class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/75 text-white w-10 h-10 rounded-full flex items-center justify-center transition"><i class="fa-solid fa-chevron-left"></i></button>
+      <button onclick="navigateGallery(1)" class="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/75 text-white w-10 h-10 rounded-full flex items-center justify-center transition"><i class="fa-solid fa-chevron-right"></i></button>
+      <div id="z-dots-container" class="flex gap-2 mt-4"></div>
+    </div>
+  </div>
+
+  <!-- Dynamic Toast Container -->
+  <div id="toast-container" style="z-index:2147483647" class="fixed top-4 left-4 right-4 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-[28rem] flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- Load Standalone JavaScript Modules in Dependency Order -->
+  <script src="src/config.js"></script>
+  <script src="src/store/state.js"></script>
+  <script src="src/translations/i18n.js"></script>
+  <script src="src/translations/i18n-extra.js"></script>
+  <script src="src/components/modals.js"></script>
+  <script src="src/api-client.js"></script>
+  <script src="src/auth/auth.js"></script>
+  <script src="src/components/bookings-ui.js"></script>
+  <script src="src/components/views.js"></script>
+  <script src="src/components/accounts.js"></script>
+  <script src="src/router.js"></script>
+  <script src="src/app.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,124 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+/* Main Body Typography */
+body {
+  font-family: 'Inter', sans-serif;
+}
+html { -webkit-text-size-adjust: 100%; }
+
+/* ---- Navigasi situs publik ---- */
+.nav-link {
+  display: inline-flex; align-items: center; gap: .5rem;
+  padding: .375rem .25rem .25rem; font-size: .875rem; font-weight: 600;
+  color: #64748b; border-bottom: 2px solid transparent; transition: all .15s;
+}
+.nav-link:hover { color: #1e293b; border-color: #cbd5e1; }
+.nav-link.is-active { color: #0369a1; border-color: #0369a1; }
+
+.mobile-link {
+  display: flex; align-items: center; gap: .75rem;
+  padding: .75rem .75rem; border-radius: .5rem; font-size: .9rem; font-weight: 600; color: #334155;
+}
+.mobile-link i { width: 1.1rem; text-align: center; color: #94a3b8; }
+.mobile-link:hover { background: #f1f5f9; }
+.mobile-link.is-active { background: #e0effe; color: #0369a1; }
+.mobile-link.is-active i { color: #0369a1; }
+
+/* ---- Navigasi situs admin (sidebar terang agar logo BIRAMA tampil tanpa kotak putih) ---- */
+.admin-link {
+  display: flex; align-items: center; gap: .75rem;
+  padding: .625rem .75rem; border-radius: .5rem; font-size: .875rem; font-weight: 600; color: #475569;
+  transition: background .15s, color .15s;
+}
+.admin-link i { width: 1.1rem; text-align: center; color: #94a3b8; }
+.admin-link:hover { background: #f1f5f9; color: #0f172a; }
+.admin-link.is-active { background: #f59e0b; color: #0f172a; }
+.admin-link.is-active i { color: #0f172a; }
+
+/* ---- Form ---- */
+.field {
+  width: 100%; padding: .625rem .75rem; border: 1px solid #cbd5e1; border-radius: .5rem;
+  font-size: .875rem; background: #fff; outline: none; transition: border-color .15s, box-shadow .15s;
+}
+.field:focus { border-color: #0284c7; box-shadow: 0 0 0 3px rgba(2,132,199,.2); }
+.req::after { content: ' *'; color: #e11d48; font-weight: 700; }
+.field-label { display: block; font-size: .75rem; font-weight: 600; color: #334155; margin-bottom: .25rem; }
+.oauth-btn {
+  width: 100%; height: 2.75rem; display: flex; align-items: center; justify-content: center; gap: .75rem;
+  background: #fff; border: 1px solid #cbd5e1; border-radius: .5rem; font-size: .875rem; font-weight: 600; color: #1e293b;
+  transition: background .15s, border-color .15s;
+}
+.oauth-btn:hover { background: #f8fafc; border-color: #94a3b8; }
+
+/* ---- Matriks waktu: lebar kolom nama ruangan responsif (sinkron dengan matrixLabelWidth() di views.js) ---- */
+.matrix-label-col { width: 132px; min-width: 132px; }
+@media (min-width: 640px) { .matrix-label-col { width: 200px; min-width: 200px; } }
+
+/* ---- Layar sentuh / mobile ---- */
+@media (max-width: 639px) {
+  /* 16px mencegah iOS Safari melakukan zoom otomatis saat input difokuskan */
+  input, select, textarea { font-size: 16px !important; }
+
+  /* Modal tampil sebagai bottom-sheet */
+  .modal-overlay:not(.modal-overlay-plain) { align-items: flex-end; padding: 0 !important; }
+  .modal-overlay:not(.modal-overlay-plain) > div:first-child {
+    max-width: none; width: 100%; max-height: 94vh;
+    border-bottom-left-radius: 0; border-bottom-right-radius: 0;
+    border-top-left-radius: 1rem; border-top-right-radius: 1rem;
+  }
+}
+button, a, select { -webkit-tap-highlight-color: transparent; }
+
+/* Custom Webkit Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Custom Grid Timeline 24-Hour Column Alignment */
+.grid-timeline-cols {
+  display: grid;
+  grid-template-columns: 200px repeat(24, minmax(52px, 1fr));
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Sticky Frozen Column & Freeze Line for Matrix Table Stability */
+.sticky-frozen-col {
+  position: sticky;
+  left: 0;
+  z-index: 25;
+  background-color: #ffffff;
+  box-shadow: inset -2px 0 0 0 #94a3b8;
+}
+
+.sticky-frozen-header {
+  position: sticky;
+  left: 0;
+  z-index: 30;
+  background-color: #f1f5f9;
+  box-shadow: inset -2px 0 0 0 #94a3b8;
+}
+
+/* Modal Animations */
+.modal-fade-in {
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+.is-invalid { border-color: #e11d48 !important; background-color: #fff1f2 !important; box-shadow: 0 0 0 1px rgba(225,29,72,.12); }
+.is-invalid:focus { box-shadow: 0 0 0 3px rgba(225,29,72,.2) !important; }
+[role="alert"] > span { white-space: pre-line; }
