@@ -1,7 +1,5 @@
 # BIRAMA
 
-# BIRAMA
-
 BIRAMA (Bank Indonesia Institute Room Allocation and Management Application) 
 is a web-based classroom booking and monitoring system developed for Bank 
 Indonesia Institute.
